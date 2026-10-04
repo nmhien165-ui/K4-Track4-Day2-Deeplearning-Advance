@@ -1,0 +1,16 @@
+{
+  "selection_split": "val",
+  "metric": "macro_f1",
+  "inference_tolerance": 0.005,
+  "inference_tiebreak": "batch1 p95 then ECE",
+  "backbone": "convnext_tiny",
+  "training_exp_id": "T02",
+  "training_delta": {"aug": "color"},
+  "inference_id": "I04",
+  "inference_method": "resolution256",
+  "epochs": 10,
+  "batch_size": 64,
+  "seeds": [0, 1, 2],
+  "baseline": "T00 + I00",
+  "test_access_before_lock": false
+}
