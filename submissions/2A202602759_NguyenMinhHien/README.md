@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-Phần `code/` đã hoàn thiện và kiểm thử bằng dữ liệu tổng hợp lẫn dữ liệu DeepWeeds thật trên Colab Tesla T4. Năm backbone B01–B05, T00–T04 và I00–I04 đã chạy; val được dùng để chốt `T02 + I04` trong `final_lock.json`. F01 có dự đoán val/test thật cho đủ ba seed `0, 1, 2`; mốc T00 có dự đoán thật cho seed `0, 1`. Các CSV đã được `eval.py score` đối chiếu với nhãn gốc. T00 seed 2 bị ngắt ở epoch 4/10 khi Colab hết hạn mức GPU; Kaggle chưa cho bật GPU trên tài khoản hiện tại. Theo lựa chọn của người nộp, bản này được chốt với hai seed baseline, không có kết quả seed 2 hoặc điểm I2. Theo điều kiện P4 của `RUBRIC.md`, việc thiếu dự đoán mốc ở mọi seed có nguy cơ khiến toàn bộ phần I bị 0 điểm. `results.xlsx` và `report.md` chỉ dùng số đã kiểm chứng. Phiên Colab đầu hết thời gian nên `curves/` B/T được dựng lại từ log đã lưu trong output notebook, không phải ảnh PNG gốc.
+Phần `code/` đã hoàn thiện và kiểm thử bằng dữ liệu tổng hợp lẫn dữ liệu DeepWeeds thật trên Colab Tesla T4. Năm backbone B01–B05, T00–T04 và I00–I04 đã chạy; val được dùng để chốt `T02 + I04` trong `final_lock.json`. F01 và mốc T00 đều có dự đoán val/test thật cho đủ ba seed `0, 1, 2`; các CSV đã được `eval.py score` đối chiếu với nhãn gốc. T00 seed 2 được chạy lại từ đầu đủ 10 epoch trên Colab T4 sau khi phiên trước ngắt ở epoch 4. `eval.py grade` đã chạy: đề xuất 18/19 điểm cho các mục đã chấm của phần I; I4(a) chưa chấm được vì không có dự đoán test trước/sau temperature scaling. Đây là điểm tự chấm theo ngưỡng tạm thời, giảng viên xác nhận. `results.xlsx` và `report.md` chỉ dùng số đã kiểm chứng. Biểu đồ B/T seed 0 được dựng lại từ log đã lưu trong output notebook; T00 seed 2 có PNG gốc.
 
 ## Chạy lại trên Colab
 
@@ -11,7 +11,7 @@ Phần `code/` đã hoàn thiện và kiểm thử bằng dữ liệu tổng h�
 3. Ô dữ liệu tải ảnh DeepWeeds và các CSV fold 0. Kiểm tra MD5 và kết quả `dataset.check_split()` trước khi train.
 4. Chạy EDA và kiểm tra pipeline, sau đó quét backbone, ablation và suy luận **chỉ trên val**. Mọi lần train dùng `train.run(Config(...))`.
 5. Ô khóa cấu hình tự chọn theo val, ghi `final_lock.json` rồi mới cho phép phần chung kết và mốc chạy seed `0, 1, 2`. Cấu hình đã chốt cho lượt chạy trong báo cáo là ConvNeXt Tiny, tăng cường màu và suy luận ảnh gốc ở 256 px (`resolution256`). `train.run()` giữ val 224 px để chọn checkpoint khi huấn luyện và dùng loader 256 px riêng cho dự đoán val/test của I04.
-6. Sau khi chạy thêm T00 seed 2 thật, dùng `eval.py score` và `eval.py grade` như các ô cuối. Gói hiện tại chưa chạy `grade` vì thiếu seed này. Tạo `results.xlsx` và viết báo cáo chỉ từ log/dự đoán chạy thật.
+6. Chạy `eval.py score` và `eval.py grade` như các ô cuối. Kết quả đối chiếu hiện tại nằm trong `eval_out/`; bảng và báo cáo chỉ dùng log/dự đoán chạy thật.
 
 Test code cốt lõi trên Colab: `cd submissions/2A202602759_NguyenMinhHien/code && python -m unittest test_code -v`.
 
@@ -20,4 +20,4 @@ Test code cốt lõi trên Colab: `cd submissions/2A202602759_NguyenMinhHien/cod
 - Fold 0 cố định; train cập nhật trọng số, val chọn cấu hình và checkpoint, test chỉ chạy một lần sau khi chốt.
 - CSV subset gốc chỉ có `Filename,Label`; `Species` được suy ra theo `Label` từ `labels.csv`. Một ảnh train (`20170714-110407-3.jpg`) mang Label 0 trong fold 0 và Label 1 trong `labels.csv`; code giữ nhãn fold 0 và ghi rõ sai khác này, không sửa CSV gốc.
 - Không đưa ảnh, checkpoint hoặc thông tin cá nhân vào Git.
-- Notebook Colab dùng để xác minh và chạy thí nghiệm thật: https://colab.research.google.com/drive/1Nu0ZfCysZZHUJ3ci6ZyntVxP744G5ojr. Notebook này còn các ô smoke test cũ và output lịch sử; bản quy trình đầy đủ, sạch nằm ở `code/lab_day2.ipynb`.
+- Notebook Colab dùng để xác minh và chạy thí nghiệm thật: https://colab.research.google.com/drive/1Nu0ZfCysZZHUJ3ci6ZyntVxP744G5ojr. Lượt chạy lại T00 seed 2: https://colab.research.google.com/drive/1gb29lZpw1Cux2LSW_jW5w-YOm6CUEyVM. Các notebook Drive còn output lịch sử; bản quy trình đầy đủ, sạch nằm ở `code/lab_day2.ipynb`.

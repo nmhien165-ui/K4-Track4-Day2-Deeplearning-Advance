@@ -4,7 +4,7 @@
 
 ## 1. Tóm tắt
 
-Đã kiểm tra pipeline trên dữ liệu DeepWeeds thật và so sánh năm backbone với cùng cấu hình huấn luyện 10 epoch, seed 0 trên Tesla T4. ConvNeXt Tiny đạt macro-F1 val cao nhất trong lượt quét backbone: 0,9680. Sau ba ablation đơn và một tổ hợp, T02 được chọn bằng val. Trong năm phương pháp suy luận, I04 (ảnh gốc 256 px) được chọn theo quy tắc chất lượng trong 0,005 của điểm cao nhất rồi ưu tiên p95 thấp. Cấu hình F01 đạt macro-F1 test **0,9724 ± 0,0024** và top-1 test **0,9779 ± 0,0019** qua ba seed. Mốc T00 có hai seed hoàn tất, macro-F1 test 0,9676 ± 0,0005; kết quả này chỉ tham khảo vì rubric yêu cầu ba seed cho so sánh cuối.
+Đã kiểm tra pipeline trên dữ liệu DeepWeeds thật và so sánh năm backbone với cùng cấu hình huấn luyện 10 epoch, seed 0 trên Tesla T4. ConvNeXt Tiny đạt macro-F1 val cao nhất trong lượt quét backbone: 0,9680. Sau ba ablation đơn và một tổ hợp, T02 được chọn bằng val. Trong năm phương pháp suy luận, I04 (ảnh gốc 256 px) được chọn theo quy tắc chất lượng trong 0,005 của điểm cao nhất rồi ưu tiên p95 thấp. Cấu hình F01 đạt macro-F1 test **0,9724 ± 0,0024** và top-1 test **0,9779 ± 0,0019** qua ba seed. Mốc T00 đạt macro-F1 test **0,9688 ± 0,0021** qua ba seed; F01 cải thiện +0,0036 macro-F1 theo trung bình seed.
 
 ## 2. Dữ liệu và thiết lập
 
@@ -98,7 +98,7 @@ Macro-F1 val không đổi vì chia logit cho nhiệt độ dương giữ nguyê
 
 ## 6. Cấu hình cuối và test
 
-Đã ghi `final_lock.json` trên Colab trước khi mở test: ConvNeXt Tiny, T02 tăng cường màu, 10 epoch, batch 64, I04 ảnh gốc 256 px, seed 0/1/2. F01 seed 0 dùng lại checkpoint T02R, chính là lượt huấn luyện cùng cấu hình và seed 0, rồi dự đoán test một lần theo I04. Seed 1–2 được huấn luyện độc lập cùng cấu hình đã khóa. CSV val/test của cả ba seed đã lưu trong `predictions/`; `eval.py score` xác nhận 3.501/3.507 hàng, tên ảnh/nhãn đúng CSV fold 0, `y_pred = argmax(p0…p8)` và xác suất hợp lệ. Mốc T00 seed 0–1 đã chạy đủ 10 epoch và có CSV val/test; seed 2 bị Colab ngắt ở epoch 4/10 do hết hạn mức GPU. Kaggle không mở GPU cho tài khoản hiện tại. Theo lựa chọn của người nộp, báo cáo chốt với hai seed mốc, **không** điền số liệu seed 2 và chưa tự chấm I2 bằng `eval.py grade`.
+Đã ghi `final_lock.json` trên Colab trước khi mở test: ConvNeXt Tiny, T02 tăng cường màu, 10 epoch, batch 64, I04 ảnh gốc 256 px, seed 0/1/2. F01 seed 0 dùng lại checkpoint T02R, chính là lượt huấn luyện cùng cấu hình và seed 0, rồi dự đoán test một lần theo I04. Seed 1–2 được huấn luyện độc lập cùng cấu hình đã khóa. CSV val/test của cả ba seed đã lưu trong `predictions/`. Mốc T00 seed 0–1 chạy đủ 10 epoch ở phiên trước; sau khi phiên cũ ngắt, seed 2 được chạy lại từ đầu đủ 10 epoch trên Colab T4 và có CSV val/test cùng lịch sử epoch thật. `eval.py score` xác nhận cả F01 và T00 đều có ba seed, mỗi CSV val/test đủ 3.501/3.507 hàng, tên ảnh/nhãn đúng CSV fold 0, `y_pred = argmax(p0…p8)` và xác suất hợp lệ.
 
 | Cấu hình | Seed | Macro-F1 val | Macro-F1 test | Top-1 test | ECE test |
 |---|---:|---:|---:|---:|---:|
@@ -108,9 +108,10 @@ Macro-F1 val không đổi vì chia logit cho nhiệt độ dương giữ nguyê
 | **F01 mean ± std** | **3 seed** | **0,970070 ± 0,003713** | **0,972416 ± 0,002360** | **0,977854 ± 0,001855** | **0,006820 ± 0,000828** |
 | T00: nền + I00 | 0 | 0,968072 | 0,967188 | 0,974337 | 0,011689 |
 | T00: nền + I00 | 1 | 0,963162 | 0,967952 | 0,975192 | 0,009698 |
-| **T00 tham khảo mean ± std** | **2 seed** | **0,965617 ± 0,003472** | **0,967570 ± 0,000541** | **0,974765 ± 0,000605** | **0,010694 ± 0,001408** |
+| T00: nền + I00 | 2 | 0,970344 | 0,971196 | 0,977759 | 0,009054 |
+| **T00 mean ± std** | **3 seed** | **0,967193 ± 0,003671** | **0,968779 ± 0,002128** | **0,975763 ± 0,001781** | **0,010147 ± 0,001374** |
 
-Chênh lệch macro-F1 test giữa trung bình F01 ba seed và T00 hai seed là +0,004846. Hai nhóm **không cùng số seed**, vì vậy đây là đối chiếu sơ bộ và không đủ điều kiện chấm I2. Không chọn lại cấu hình từ kết quả test này.
+Chênh lệch macro-F1 test giữa trung bình F01 và T00, mỗi nhóm ba seed, là +0,003638. Độ lệch chuẩn lớn hơn của hai nhóm là 0,002360; chênh lệch lớn hơn mức này nên `eval.py grade` đề xuất I2 = 4/5 điểm. Tổng các mục phần I đã chấm là 18/19; I4(a) chưa chấm được vì không có CSV test của cùng cấu hình trước/sau temperature scaling. Đây là điểm tự chấm theo ngưỡng tạm thời, giảng viên xác nhận. Không chọn lại cấu hình từ kết quả test này.
 
 Chỉ số theo lớp trên test dưới đây là trung bình của ba seed F01, tính từ các CSV dự đoán bằng `eval.py`; số ảnh mỗi lớp là số ảnh trong fold 0 test.
 
@@ -134,12 +135,12 @@ Trong ma trận nhầm lẫn seed 0, Chinee apple bị đoán thành Snake weed 
 
 ## 7. Kết luận và khuyến nghị
 
-Lượt quét backbone một seed cho thấy ConvNeXt Tiny với trọng số `in12k_ft_in1k` vượt các backbone còn lại trong thiết lập này, nhưng không tách được ảnh hưởng kiến trúc khỏi nguồn tiền huấn luyện. T02 hơn T00 rất ít ở val gốc và tăng thời gian train đáng kể. I04 cho điểm val gần cao nhất với chi phí suy luận thấp hơn các phương pháp hai view. F01 đã có đủ ba seed và p95 batch 1 là 8,711 ms, thấp hơn ngân sách 100 ms của rubric. Chênh lệch test so với T00 mới là đối chiếu sơ bộ vì baseline còn thiếu seed 2.
+Lượt quét backbone một seed cho thấy ConvNeXt Tiny với trọng số `in12k_ft_in1k` vượt các backbone còn lại trong thiết lập này, nhưng không tách được ảnh hưởng kiến trúc khỏi nguồn tiền huấn luyện. T02 hơn T00 rất ít ở val gốc và tăng thời gian train đáng kể. I04 cho điểm val gần cao nhất với chi phí suy luận thấp hơn các phương pháp hai view. F01 và T00 đã có đủ ba seed. F01 hơn T00 0,003638 macro-F1 test theo trung bình ba seed; p95 batch 1 của F01 là 8,711 ms, thấp hơn ngân sách 100 ms của rubric.
 
 ## 8. Hạn chế
 
-Hiện các kết quả backbone chỉ có một seed, một fold và chia ảnh ngẫu nhiên thay vì chia theo địa điểm. Baseline cuối mới có hai seed, nên phần so sánh cải thiện và chấm I2 chưa đạt yêu cầu. Điểm test cuối có thể lạc quan khi triển khai ở địa điểm hoặc mùa khác. Tag tiền huấn luyện khác nhau và phép đếm GMAC của DeiT có giới hạn đã nêu ở trên.
+Hiện các kết quả backbone/ablation chỉ có một seed, một fold và chia ảnh ngẫu nhiên thay vì chia theo địa điểm. F01 và T00 có ba seed, nhưng chênh lệch test vẫn nhỏ và không chứng minh được khả năng tổng quát hóa sang địa điểm hoặc mùa khác. Điểm test cuối có thể lạc quan khi triển khai thực tế. Tag tiền huấn luyện khác nhau và phép đếm GMAC của DeiT có giới hạn đã nêu ở trên; hiệu chuẩn nhiệt độ mới được kiểm tra trên val.
 
 ## 9. Phụ lục và tái lập
 
-Notebook Colab có output từ các lần chạy thật: <https://colab.research.google.com/drive/1Nu0ZfCysZZHUJ3ci6ZyntVxP744G5ojr>. Phiên Colab đầu đã hết thời gian và xóa tệp `/content`. Biểu đồ B01–B05/T00–T04 trong `curves/` được dựng lại từ log từng epoch đã lưu trong notebook (loss/F1 làm tròn bốn chữ số, thời gian một chữ số), nên không phải PNG gốc của phiên đầu. Checkpoint lớn và dataset không đưa vào repo. Notebook nguồn trong `code/` có các bước chạy lại từ đầu; thí nghiệm thật trên Colab có thêm bước khôi phục T02R sau khi phiên đầu mất checkpoint.
+Notebook Colab có output từ các lần chạy thật: <https://colab.research.google.com/drive/1Nu0ZfCysZZHUJ3ci6ZyntVxP744G5ojr>; lượt T00 seed 2 chạy lại đủ 10 epoch ở <https://colab.research.google.com/drive/1gb29lZpw1Cux2LSW_jW5w-YOm6CUEyVM>. Phiên Colab đầu đã hết thời gian và xóa tệp `/content`. Biểu đồ B01–B05/T00–T04 seed 0 trong `curves/` được dựng lại từ log từng epoch đã lưu trong notebook (loss/F1 làm tròn bốn chữ số, thời gian một chữ số), nên không phải PNG gốc của phiên đầu; đường cong T00 seed 2 là PNG gốc của lượt chạy lại. Checkpoint lớn và dataset không đưa vào repo. Notebook nguồn trong `code/` có các bước chạy lại từ đầu; thí nghiệm thật trên Colab có thêm bước khôi phục T02R sau khi phiên đầu mất checkpoint.
